@@ -4,7 +4,6 @@
   <a href="https://colab.research.google.com/github/joyjoy0213/csd/blob/main/colab%20private-sd.ipynb"><img src="./image/README/tmpktq2ywtz.png" width="768" height="512" alt="open in colab"></a> 
 </div>
 
-
 <div align="center">
 🚀并行下载摇树优化，提供更快的部署🚀<br/>
 🎇可选功能，使用户能够灵活定制🎇<br/>
@@ -61,6 +60,8 @@
 <div id="Update">
 <h2>📔 更新日志</h2>
 
+### v2.2.3(23/1/15)
+- 更新图片秒读脚本修复部分bug,支持1.6.0，并可以关闭。
 ### v2.2.2(23/12/14)
 - 支持填入cookie下载civitai模型
 - 优化了2.1模型管理前端ui的交互
