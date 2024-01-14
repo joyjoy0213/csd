@@ -1,8 +1,9 @@
 <h1 align="center">colab_stable_diffusion_webui</h1>
 <div align="center">
   <div>👇点击图片进入colab👇</div>
-  <a href="[https://colab.research.google.com/github/s4afa451dgf415f/colab_stable_diffusion/blob/main/%E4%BA%91stable_diffusion(%E4%BF%AE%E5%A4%8D%E6%8C%96%E7%9F%BF%E5%AB%8C%E7%96%91).ipynb](https://colab.research.google.com/github/joyjoy0213/csd/blob/main/colab%20private-sd.ipynb)"><img src="./image/README/tmpktq2ywtz.png" width="768" height="512" alt="open in colab"></a> 
+  <a href="https://colab.research.google.com/github/joyjoy0213/csd/blob/main/colab%20private-sd.ipynb"><img src="./image/README/tmpktq2ywtz.png" width="768" height="512" alt="open in colab"></a> 
 </div>
+
 
 <div align="center">
 🚀并行下载摇树优化，提供更快的部署🚀<br/>
