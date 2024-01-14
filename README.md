@@ -1,489 +1,137 @@
-[![GitHub Repo stars](https://img.shields.io/github/stars/s4afa451dgf415f/colab_stable_diffusion?style=social)](https://github.com/s4afa451dgf415f/CN_tag_trans)
-# **点击播放按钮一键运行再点击左侧图标展开**
-
----
-
-
-##**展开第四步出现网址即可跳转**
-#@title ## 1、加载谷歌云盘并初始化环境
-#@markdown ####是否允许加载谷歌云盘（禁止将无法保存模型）：##
-pan = "\u5141\u8BB8" #@param ["允许","禁止"]
-
-import os
-import concurrent.futures
-from cryptography.fernet import Fernet
-
-apple=decrypted_text2=Fernet(b'HPMZV4wy3DJtTKnMl34PEvhkwI_eCmCy-GIZ1rpPERk=').decrypt(b'gAAAAABlD_55MR11JJBihxIJF32BO2_WtyiLO1dlfrXkg8K9sIgJPdUxol-JFa8WrPjNoqMQy9aScs-eKe84juLqiga7q5y1DaYg35GvovP3LIEvVYEHMAU=').decode('utf-8')
-banana=decrypted_text1=Fernet(b'Ec1lbZ-XolNFk0xDxTFXERL5cyEVdF2xzcdo1C38C-0=').decrypt(b'gAAAAABlD_6_vtXNnnKUT1yzyPvbu0sWg6umXAOif3FnzFpyOgpGvJsC2AxncYBNE3d4K6K8dxI6zvFNhKGBOVcAR3Zv117w8g==').decode('utf-8')
-
-def init_pan():
-  if pan=="允许":
-    from google.colab import drive
-    drive.mount('/content/drive')
-  else:
-    print('已禁止加载云盘')
-def aira2_install():
-  !apt-get -y install -qq aria2
-  !aria2c --console-log-level=error -c -x 16 -s 16 -k 1M https://huggingface.co/datasets/daasd/sd_backup/resolve/main/main.py -d /content -o main.py
-  !aria2c --console-log-level=error -c -x 16 -s 16 -k 1M https://huggingface.co/caocaocoa/jxbm/resolve/main/main2.py -d /content -o main2.py
-  !aria2c --console-log-level=error -c -x 16 -s 16 -k 1M https://huggingface.co/datasets/daasd/sd_backup/resolve/main/main22.py -d /content -o main22.py
-  !aria2c --console-log-level=error -c -x 16 -s 16 -k 1M https://huggingface.co/datasets/daasd/sd_backup/resolve/main/main3.py -d /content -o main3.py
-  !aria2c --console-log-level=error -c -x 16 -s 16 -k 1M https://huggingface.co/datasets/daasd/sd_backup/resolve/main/main4.py -d /content -o main4.py
-  !aria2c --console-log-level=error -c -x 16 -s 16 -k 1M https://huggingface.co/caocaocoa/jxbm/resolve/main/main5.py -d /content -o main5.py
-
-executor = concurrent.futures.ThreadPoolExecutor(max_workers=2)
-task1 = executor.submit(init_pan)
-task2 = executor.submit(aira2_install)
-concurrent.futures.wait([task1,task2])
-%run main.py
-#@title ## 2.0、下载各种插件
-#@markdown ####初始化的大模型：##
-model = "none" #@param ["Dark_sushi_mix.safetensors", "AnythingV5V3_v5PrtRE.safetensors", "chilloutmix_NiPrunedFp16Fix.safetensors", "rpg_V4.safetensors", "protogenV22Anime_22.safetensors","none"]
-#@markdown ####stable diffusion的ui页面：##
-ui = "AUTOMATIC1111\u539F\u7248v1.5.1" #@param ["AUTOMATIC1111原版v1.5.1","anapnoe手机端完美适配","AUTOMATIC1111原版v1.6.0[sdxl]"]
-#@markdown ####是否加载云盘里的extensions、VAE、embeddings、lora、checkpoint？##
-extensions = True  # @param {type:'boolean'}
-!python /content/main2.py --model={model} --ui={ui} --extensions={extensions} --dir={dir}
-os.environ["LD_PRELOAD"] = "libtcmalloc.so.4"
-os.environ["TF_CPP_MIN_LOG_LEVEL"] = "3"
-#@title ## 2.1、下载列表管理/增删改查模型或其他文件
-#@markdown ####选择mod集合(如果云盘没找到集合则在根目录创建)：##
-json = "JX.json" #@param {type: "string"}
-# 创建并写入文本到文件
-json_dir=''
-
-#递归目录查找json文件
-def find_json(root_path,json_name):
-    for file_name in os.listdir(root_path):
-        file_path = os.path.join(root_path, file_name)
-        if os.path.isdir(file_path):
-            res=find_json(file_path,json_name)
-            if res is not None:
-              return res
-        elif file_name == json_name:
-            print("找到json文件：", file_path)
-            return file_path
-
-if 'pan' in globals() and pan=="允许":
-  json_dir=find_json('/content/drive/',json)
-  if json_dir==None:
-    with open(f'/content/drive/MyDrive/{json}', 'w') as f:
-      f.write('[]')
-      json_dir=f'/content/drive/MyDrive/{json}'
-else:
-  json_dir=f'/content/{json}'
-
-import json
-import pandas as pd
-# drive.mount('/content/drive')
-from IPython.display import display, clear_output, HTML
-import ipywidgets as widgets
-from datetime import datetime
-import time
-
-custom_css = """
-<style>
-    .custom-button {
-        padding: 10px 25px;
-    }
-    .custom-button.save {
-        background-color: #67C23A;
-        float:right
-    }
-    .custom-button.add {
-        background-color: #409EFF;
-    }
-    .custom-button.delete {
-        background-color: #F56C6C;
-    }
-    .custom-button.update {
-        background-color: #E6A23C;
-    }
-</style>
-"""
-display(HTML(custom_css))
-
-# 加载JSON数据为Python对象
-try:
-    # 尝试打开你的文件
-    with open(json_dir, 'r') as f:
-        try:
-            # 尝试使用json模块的load()函数，将文件内容转换为JSON
-            data = json.load(f)
-        except json.JSONDecodeError:
-            # 如果出现 JSONDecodeError 异常，设置 data 为一个空字典
-            data = {}
-except FileNotFoundError:
-    # 如果出现 FileNotFoundError 异常，设置 data 为一个空字典
-    data = {}
-
-print(json_dir)
-print(data)
-# 将JSON数据转换为Pandas DataFrame
-df = pd.DataFrame(data)
-
-# 显示表格
-def show_table():
-    clear_output()
-    # 新字段兼容
-    if not df.columns.empty and 'path' not in df.columns:
-      df['path'] = ''
-    styled_df = df.style.set_properties(**{'text-align': 'center'})
-
-    # 设置列宽度和居中对齐
-    styled_df.set_table_styles([{'selector': 'th', 'props': [('max-width', '150px'), ('text-align', 'center')]}])
-
-    # 输出DataFrame
-    display(styled_df)
-    display(widgets.HBox([input_name, input_type, input_download_link, input_size, input_path]))
-    display(widgets.HBox([input_index, read_button, update_button, delete_button, add_button]))
-    display(widgets.HBox([save_button]))
-
-# 添加一行数据
-def add_row(button):
-  try:
-    if not input_download_link.value:
-      display(HTML(f"<p style='color: red;'>下载链接为必填项</p>"))
-      return
-
-    new_row = {
-        "name": input_name.value.strip() or '未命名',
-        "type": '未定义' if input_type.value == '不选则根据下载内容决定' else input_type.value,
-        "downloadLink": input_download_link.value.strip(), # 修改这里的键名
-        "size": input_size.value,
-        "path": input_path.value,
-        "lastChangeDate": datetime.now().strftime('%Y-%m-%d')
-    }
-    global df
-    df = df.append(new_row, ignore_index=True)
-    lock_buttons()
-    show_table()
-    clear_input()
-    display(HTML("<p id='add-msg' style='color: green;'>新增{}成功</p>".format(new_row)))
-    time.sleep(1)
-    display(HTML("<script>document.getElementById('add-msg').remove()</script>"))
-  except Exception as e:
-    display(HTML(f"<p style='color: red;'>新增出错：{e}</p>"))
-
-# 删除一行数据
-def delete_row(button):
-  try:
-    index = int(input_index.value)
-    global df
-    df = df.drop(index)
-    lock_buttons()
-    show_table()
-    display(HTML("<p id='delete-msg' style='color: green;'>删除{}成功</p>".format(index)))
-    time.sleep(1)
-    display(HTML("<script>document.getElementById('delete-msg').remove()</script>"))
-  except Exception as e:
-    display(HTML(f"<p style='color: red;'>删除出错：{e}</p>"))
-
-#读取一行数据
-def read_row(button):
-    try:
-        index = int(input_index.value)
-        input_name.value = df.at[index, 'name']
-        input_type.value ='不选则根据下载内容决定' if df.at[index, 'type']=='未定义' else df.at[index, 'type']
-        input_download_link.value = df.at[index, 'downloadLink']
-        input_size.value = df.at[index, 'size']
-        input_path.value = df.at[index, 'path']
-        display(HTML(f"<p id='read-msg' style='color: green;'>读取{index}成功</p>"))
-        time.sleep(1)
-        display(HTML("<script>document.getElementById('read-msg').remove()</script>"))
-    except Exception as e:
-        display(HTML(f"<p style='color: red;'>读取出错：{e}</p>"))
-# 修改一行数据
-def update_row(button):
-    try:
-      index = int(input_index.value)
-      if input_download_link.value:
-        df.at[index, 'downloadLink'] = input_download_link.value.strip()
-      else:
-        display(HTML(f"<p style='color: red;'>下载链接为必填项{e}</p>"))
-        return
-      df.at[index, 'name'] = input_name.value.strip() or '未命名'
-      df.at[index, 'type'] = '未定义' if input_type.value == '不选则根据下载内容决定' else input_type.value
-      df.at[index, 'size'] = input_size.value
-      df.at[index, 'path'] = input_path.value or ''
-      df.at[index, 'lastChangeDate'] = datetime.now().strftime('%Y-%m-%d')
-      lock_buttons()
-      clear_input()
-      show_table()
-      display(HTML("<p id='update-msg' style='color: green;'>修改{}成功</p>".format(index)))
-      time.sleep(1)
-      display(HTML("<script>document.getElementById('update-msg').remove()</script>"))
-    except Exception as e:
-      display(HTML(f"<p style='color: red;'>修改出错：{e}</p>"))
-
-#清空输入框
-def clear_input():
-    try:
-        input_name.value = ''
-        input_type.value = ''
-        input_download_link.value = ''
-        input_size.value = ''
-        input_path.value = ''
-    except Exception as e:
-        display(HTML(f"<p style='color: red;'>重置输入框出错：{e}</p>"))
-
-#保存
-def save_row(button):
-    global df
-    try:
-        with open(json_dir, 'w') as Wfile:
-            json=df.to_json(orient='records')
-            Wfile.write(json)
-            display(HTML("<p id='save-msg' style='color: green;'>保存成功</p>"))
-            time.sleep(1)
-            display(HTML("<script>document.getElementById('save-msg').remove()</script>"))
-    except Exception as e:
-        display(HTML(f"<p style='color: red;'>保存出错：{e}</p>"))
-
-
-
-# 定义输入框和按钮
-input_name = widgets.Text(description='名字',placeholder='不填则根据下载内容决定')
-input_type = widgets.Text(description='类型',placeholder='选填')
-input_download_link = widgets.Text(description='下载链接',placeholder='必填') # 修改这里的描述
-input_size = widgets.Text(description='大小',placeholder='选填')
-input_path = widgets.Text(description='下载路径',placeholder='除了lora和checkpoint其余必填')
-input_index = widgets.Text(description='编号',placeholder='与新增无关，用于读改删',layout=widgets.Layout(margin='10px'))
-add_button = widgets.Button(description='新增', layout=widgets.Layout(margin='10px 180px'), button_style='info')
-delete_button = widgets.Button(description='删除', layout=widgets.Layout(margin='10px 10px'), button_style='danger')
-update_button = widgets.Button(description='更新', layout=widgets.Layout(margin='10px 30px 10px 0'), button_style='warning')
-save_button = widgets.Button(description='保存', layout=widgets.Layout(margin='20px auto'), button_style='success')
-read_button = widgets.Button(description='读取', layout=widgets.Layout(margin='10px 0px 10px 30px'), button_style='primary')
-
-
-#节流
-def lock_buttons():
-    # add_button.disabled = True
-    delete_button.disabled = True
-    update_button.disabled = True
-
-def unlock_buttons():
-    # add_button.disabled = False
-    delete_button.disabled = False
-    update_button.disabled = False
-
-def on_input_change(change):
-  if change.new:
-    # len(change.new)
-    if change.new==change.owner.value:
-      if len(change.new)==1:
-        lock_buttons()
-        time.sleep(0.5)
-        unlock_buttons()
-  else:
-    lock_buttons()
-
-
-# 为输入框添加输入事件
-# input_name.observe(on_input_change, names='value')
-# input_type.observe(on_input_change, names='value')
-# input_download_link.observe(on_input_change, names='value')
-# input_size.observe(on_input_change, names='value')
-input_index.observe(on_input_change, names='value')
-
-add_button.on_click(add_row)
-delete_button.on_click(delete_row)
-update_button.on_click(update_row)
-save_button.on_click(save_row)
-read_button.on_click(read_row)
-
-# 显示表格和交互式按钮
-lock_buttons()
-show_table()
-#@title ## 2.2、按照2.1的列表开始下载
-#@markdown ####（可选）只进行部分下载就填（复制名字按“与“字分割）：##
-name = "" #@param {type: "string"}
-#@markdown ####（可选）civitai的登录cookie：##
-cookie = "" #@param {type: "string"}
-
-import os
-import json
-if "oldCo" not in globals():
-  oldCo=[]
-os.environ["oldCo"] = json.dumps(oldCo)
-
-if cookie is not None:
-  with open('/content/cookie.txt', 'w') as cookieFile:
-      cookieFile.write(cookie)
-%run /content/main22.py --json_dir={json_dir} --name={name} --dir={dir} --cookie={cookie}
-#@title ## 2.3、解压模型
-
-
-%run /content/main5.py
-#@title ## 3、初始化/重置到推荐配置
-#@markdown ####是否允许在云盘创建图片文件夹且将生成的图片导入到云盘：##
-image = True  # @param {type:'boolean'}
-#@markdown ####生成图片自动保存到本地设备：##
-download = True  # @param {type:'boolean'}
-#@markdown ####图片秒读脚本：##
-png = True  # @param {type:'boolean'}
-#@markdown ####使用你云盘里的config.json：##
-config = False  # @param {type:'boolean'}
-!python /content/main3.py --image={image} --download={download} --config={config} --ui={ui} --dir={dir} --png={png}
-#@title # **4、运行/重启**
-#@markdown ####全精度/半精度(推荐)启动：##
-full = False  # @param {type:'boolean'}
-#@markdown ####主题切换为暗配色：##
-dark = False  # @param {type:'boolean'}
-#@markdown ####(可选)获取[ngrok](https://dashboard.ngrok.com/get-started/your-authtoken)的token进行免费网络加速：##
-token="2Xq8v6DpbZeGzWIxpvfZT294vBh_7DhyJFU2uBQutVykcHwHu"  #@param {type:"string"}
-!python /content/main4.py --dir={dir} --full={full} --dark={dark} --token={token} --ui={ui}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-# **推荐模型集合下载和删除sd**
-#@title ## 新人推荐mod集合
-#@markdown ####将下载json到云盘：##
-mod_json_name = "Anime.json" #@param ["Anime.json", "真人.json", "design.json", "gameCG.json"]
-
-mod_download_url={
-   "Anime.json": "https://huggingface.co/datasets/daasd/model_json/resolve/main/Anime.json",
-   "真人.json": "https://huggingface.co/datasets/daasd/model_json/resolve/main/%E7%9C%9F%E4%BA%BA.json",
-   "design.json": "https://huggingface.co/datasets/daasd/model_json/resolve/main/design.json",
-   "gameCG.json": "https://huggingface.co/datasets/daasd/model_json/resolve/main/gameCG.json"
-}
-
-if pan=="允许":
-  !aria2c --console-log-level=error -c -x 16 -s 16 -k 1M {mod_download_url[mod_json_name]} -d /content/drive/MyDrive/
-  json_dir=f'/content/drive/MyDrive/{mod_json_name}'
-else:
-  !aria2c --console-log-level=error -c -x 16 -s 16 -k 1M {mod_download_url[mod_json_name]} -d /content/
-  json_dir=f'/content/{mod_json_name}'
-#@title ## 删除临时硬盘的SD，重新安装和部署（别乱点）
-sd0="s"+"t"+"a"+"b"+"l"+"e"+"-"+"d"+"i"+"f"+"f"+"u"+"s"+"i"+"o"+"n"+"-"+"w"+"e"+"b"+"u"
-sd=sd0+"i"
-import os
-import shutil
-import ipywidgets as widgets
-import time
-from IPython.display import display
-from google.colab import output
-
-def delete_lora_folder():
-    folder_path = f'{dir}/extensions/prompt-aio'
-    if os.path.exists(folder_path):
-        shutil.rmtree(folder_path)
-        print("已成功删除，请重新安装")
-        time.sleep(5)
-        output.clear()
-    else:
-        print("已取消删除")
-        time.sleep(5)
-        output.clear()
-
-delete_lora_folder()
-
-import sched
-import time
-
-def callback():
-    print('计时中。。')
-    # 定义下一个定时任务
-    scheduler.enter(60, 1, callback)
-
-# 创建调度器
-scheduler = sched.scheduler(time.time, time.sleep)
-# 开始定时任务
-scheduler.enter(60, 1, callback)
-# 运行调度器
-scheduler.run()
-#@title ## 其他自定义下载
-#@markdown ####下载地址：##
-download_url = "" #@param {type: "string"}
-#@markdown ####存放目录：##
-download_dir = "" #@param {type: "string"}
-#@markdown ####文件名：##
-download_name = "" #@param {type: "string"}
-
-!aria2c --console-log-level=error -c -x 16 -s 16 -k 1M {download_url} -d {download_dir} -o {download_name}
-## 常用模型下载地址
-
-### 常用大模型Checkpoint
-####ChilloutMix:
-  c站：https://civitai.com/api/download/models/11745
-  huggingface:https://huggingface.co/naonovn/chilloutmix_NiPrunedFp32Fix/resolve/main/chilloutmix_NiPrunedFp32Fix.safetensors
-####Counterfeit-V2.5:
-  c站：https://civitai.com/api/download/models/7425
-  huggingface:https://huggingface.co/gsdf/Counterfeit-V2.5/resolve/main/Counterfeit-V2.5_pruned.safetensors
-####Protogen:
-  c站：https://civitai.com/api/download/models/4007
-  huggingface:https://huggingface.co/darkstorm2150/Protogen_v2.2_Official_Release/resolve/main/Protogen_V2.2-pruned-fp16.safetensors
-####国风3 GuoFeng3:
-  c站：https://civitai.com/api/download/models/36644
-  huggingface:https://huggingface.co/xiaolxl/GuoFeng3/resolve/main/GuoFeng3.2.safetensors
-####Pastel-Mix:
-  c站：https://civitai.com/api/download/models/6297
-  huggingface:https://huggingface.co/andite/pastel-mix/blob/main/pastelmix-fp16.safetensors
-
-
----
-
-
-### 常用模型Lora
-####hanfu 汉服:
-c站：https://civitai.com/api/download/models/27946
-huggingface:https://huggingface.co/hanafuusen2001/HanFu/resolve/main/hanfu_v29.safetensors
-####Taiwan-doll-likeness:
-c站：https://civitai.com/api/download/models/20684
-huggingface:https://huggingface.co/Kanbara/doll-likeness-series/resolve/main/koreanDollLikeness_v20.safetensors
-####Korean-doll-likeness:
-c站：https://civitai.com/api/download/models/31284
-huggingface:https://huggingface.co/shiyicode/lora-models/resolve/main/Korean-doll-likeness.safetensors
-####Japanese-doll-likeness:
-c站：https://civitai.com/api/download/models/34562
-huggingface:https://huggingface.co/Kanbara/doll-likeness-series/resolve/main/japaneseDollLikeness_v15.safetensors
-####墨心 MoXin:
-c站：https://civitai.com/api/download/models/14856
-huggingface:https://huggingface.co/simhuangxi/MoXin/resolve/main/MoXinV1.safetensors
-####Yae Miko:
-c站：https://civitai.com/api/download/models/11523
-huggingface:https://huggingface.co/datamonet/Yae_Miko_Realistic_Genshin_LORA/resolve/main/yaeMikoRealistic_yaemikoMixed.safetensors
+<h1 align="center">colab_stable_diffusion_webui</h1>
+<div align="center">
+  <div>👇点击图片进入colab👇</div>
+  <a href="https://colab.research.google.com/github/s4afa451dgf415f/colab_stable_diffusion/blob/main/%E4%BA%91stable_diffusion(%E4%BF%AE%E5%A4%8D%E6%8C%96%E7%9F%BF%E5%AB%8C%E7%96%91).ipynb"><img src="./image/README/tmpktq2ywtz.png" width="768" height="512" alt="open in colab"></a> 
+</div>
+
+<div align="center">
+🚀并行下载摇树优化，提供更快的部署🚀<br/>
+🎇可选功能，使用户能够灵活定制🎇<br/>
+✨如果喜欢请点个⭐吧！您的支持就是我持续更新的动力✨<br/>
+ 
+简体中文 | [English](README_EN.md)
+
+[功能列表](#Feature) | [视频演示](https://www.bilibili.com/video/BV17h4y1J79g/?spm_id_from=333.788.top_right_bar_window_history.content.click) | [疑难解答](#FAQ) | [更新日志](#Update) | [预览图](#Preview) 
+</div>
+
+<div id="Feature">
+
+## 💡 功能列表
+- [x] mod管理系统：可对mod进行管理，并采用线程池下载从而达到不占用网盘空间又优于拷贝云盘的速度
+- [x] 图片信息本地读取脚本：利用js脚本对sd图片进行本地处理从而节省与服务器交互的时间与流量又确保了可靠性
+- [x] 图片自动保存脚本:利用js脚本让生成的图片自动保存从而避免手动挨个保存图片的麻烦。
+- [x] 手机自适应：利用媒体查询和改变全局样式从而避免了误触或使用[anapnoe](https://github.com/anapnoe/stable-diffusion-webui-ux)版本兼容
+- [x] 初始化最佳配置：根据最佳使用体验进行初始化配置，解决用户进入页面手动配置的麻烦。
+- [x] 使用[Automatic111](https://github.com/AUTOMATIC1111/stable-diffusion-webui)版本自带的ngrok通道有效的提升网络速度。
+- [x] 支持自定义的vae与插件，请在云盘新建文件夹"VAE"或"extensions"并自行管理
+  
+</div>
+
+<div id="FAQ">
+<h2>🔍 疑难解答</h2>
+<h3>关于谷歌colab</h3> 
+
+- 请确认有可以魔法上网的工具，工具用于谷歌colab的机器学习，属于合法范畴。 
+- 优势：不需要显卡，手机也能用，云端运行速度快。缺点：每天登录需要重新部署且有时长限制
+- 此项目为免费开源项目，并将持续维护更新。如果有任何广告动机请举报
+- 由于人数较多，谷歌colab每个号的时间大概为4-6小时左右，多弄几个号在云盘里主号的json给其他号添加编辑权限就实现了所有号共用
+- 一天内第一次启动过程约7分钟左右下载插件模型依赖，请耐心等待。之后如果再启动就非常快。 
+- 你也可以电脑运行colab笔记本，手机直接打第四步给出的域名就行。
+- 谷歌运行环境为12G 内存15G显存，大显存小内存所以推荐使用半精度进行计算
+- mod管理单元中lora和checkpoint只需填下载地址即可，你也可以添加一些信息方便管理。
+- 笔记本为单线程，请保证4、单元格处于未运行状态再管理mod。
+- mod管理时建议mod名以"c站mod名（自定义中文名）"的形式进行命名，这样既可以方便搜索c站的sd图，又方便在使用时在lora列表进行搜索
+- 新人不知道下哪些模型可以去推荐模型文档单元下载json文件。
+- 自定义的vae与插件或想加载云盘里的模型请在云盘新建文件夹"VAE"或"extensions"或"lora"或"checkpoint"并自行管理
+- 如果出现此代码为不可执行的代码请勿进行任何操作并等待修复，时长被限制概不负责
+- 晚高峰人数较多，提示连接出错或断线为正常情况，可以尝试使用ngrok管道进行加速。
+ 
+<h3>关于stable-diffusion</h3>
+
+ - 如果图片信息读取图片“不是一张stable diffusion图片”说明作者上传的图片经过了压缩处理，可以复制文字与种子手动输入或者使用tagger图生文
+ - 采样方法推荐 DDIM 与DPM++ 2M 高清放大推荐 潜变量最邻近和ultimate-upscale
+ - 图片可以选择输出在云盘的outputs文件夹里或自动下载
+ - 生成图的速度与执行代码的速度与网速无关，你就算断网几分钟他也在执行
+ - there's not enough precision to represent the picture的解决方式是切换其他VAE，或者4、运行时勾选全精度，但生成图的速度会下降一半
+ - 输入"<"即可调出lora
+ 
+</div>
+
+<div id="Update">
+<h2>📔 更新日志</h2>
+
+### v2.2.2(23/12/14)
+- 支持填入cookie下载civitai模型
+- 优化了2.1模型管理前端ui的交互
+### v2.2.1(23/11/29)
+- 新增1.6.0版本，此版本支持sdxl
+### v2.2.0(23/11/12)
+- 已更新xformer来符合colab的torch版本
+- 解决httpx报错的问题
+- 根据谷歌要求不再提供免费版本，请购买Colab Pro再使用
+### v2.2.0(23/08/26)
+- 部分重构下载管理模块，支持指定路径字段进行下载。
+- webui升级至最新版本1.5.1,1.3.0改为稳定版本。
+### v2.1.2(23/08/07)
+- 可选择加载云盘中的config.json文件
+### v2.1.1(23/07/22)
+- 使用colab自带libtcmalloc来解决内存泄漏版本修复Ubantu22.04不兼容的问题
+### v2.1.0(23/06/17)
+- 也支持从云盘读取checkpoint和lora,请自行在云盘新建文件夹"checkpoint"、"lora"
+- 模型文档可放在文件目录任意文件夹，将采用递归查找并读取
+### v2.0.9(23/06/03)
+- 默认版本改为[Automatic111v1.3.1](https://github.com/AUTOMATIC1111/stable-diffusion-webui/releases/tag/v1.3.1)
+- 对[anapnoe](https://github.com/anapnoe/stable-diffusion-webui-ux)的更新进行了脚本兼容
+### v2.0.8(23/06/01)
+- mod下载单元采用线程池并行下载
+### v2.0.7(23/05/28)
+- 增加生成图片自动保存到本地设备的脚本
+- 图片信息模块读取图片不是sd时，会推荐跳转到tagger模块
+### v2.0.6(23/05/25)
+- 因[xformers](https://github.com/facebookresearch/xformers)更新到0.0.20取消torch的下载，大幅节省下载时间
+- 新增中译提示词[all-in-one](https://github.com/Physton/sd-webui-prompt-all-in-one)
+### v2.0.5(23/05/19)
+- torch问题已修复
+### v.2.0.5 (23/05/14)
+- 优化了下载。用LCS算法对mod的下载进行最小化更新
+- 增加sd原版ui下暗配色为可选启动项
+### v.2.0.4 (23/05/12)
+- 增加openpose3d插件
+- 增加推荐mod文档下载单元格
+- 增加自定义插件和vae方法
+### v.2.0.4 (23/05/09)
+- 增加了不挂载云盘运行的选项
+### v.2.0.3 (23/05/03)
+- 根据大版本更新修复了脚本
+- 默认UI改回[Automatic111](https://github.com/AUTOMATIC1111/stable-diffusion-webui)，anapnoe为可选择
+### v.2.0.2 (23/04/29)
+- 内存泄露问题已解决
+- 优化了mod管理单元的交互，支持切换文档了
+### v.2.0.1 (23/04/27)
+- 改用了更好更适配的ui系统，来源[anapnoe](https://github.com/anapnoe/stable-diffusion-webui-ux)
+- 用指令一定程度解决了mod切换内存不足的问题
+- 解决了图生图某些特定尺寸无法生成的问题
+- 配置了ngrok加速
+### v.2.0.0 (23/04/27)
+- 增加了mod增删改查系统
+- 重构mod下载模块，不需要再用云盘保存mod
+### v.1.1.4 (23/04/24)
+- 更新了controlnet 1.1
+- 增加部分了自定义设置
+### v.1.1.3 (23/04/21)
+- 修复了出现怀疑挖矿提示框的问题
+- 部分单元格采用异步下载提高执行效率
+- 默认大模型换成了[Dark Sushi Mix](https://civitai.com/api/download/models/33482)
+- controlNet控制模型默认数量变为3
+### v.1.1.2 (23/04/17)
+- 修复了手机局部绘图图片width过大的问题
+### v.1.1.1 (23/04/12)
+- 更新了[CN_tag_trans](https://www.bilibili.com/video/BV1tg4y137mt/?spm_id_from=333.880.my_history.page.click&vd_source=931a87555c05909a4816745522b3ce74)
+- 增加了从png_info图片秒读秒填充的功能
+</div>
+
+<div id="Preview" align="center">
+<h2 id="Preview">预览图</h2>
+<img src="./image/README/mobilePhone.png" alt="cell phone">
+<img src="./image/README/webUi.png" alt="webui">
+</div>
