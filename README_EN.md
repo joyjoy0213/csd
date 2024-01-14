@@ -1,7 +1,7 @@
 <h1 align="center">colab_stable_diffusion_webui</h1>
 <div align="center">
   <div>👇Click on the image to access Colab👇</div>
-  <a href="https://colab.research.google.com/github/joyjoy0213/csd/blob/main/colab%20private-sd.ipynb"><img src="./image/README/tmpktq2ywtz.png" width="768" height="512" alt="open in colab"></a> 
+  <a href="https://colab.research.google.com/github/joyjoy0213/csd/blob/main/colab_stable_diffusion(Fixed%20the%20suspicion%20of%20mining).ipynb"><img src="./image/README/tmpktq2ywtz.png" width="768" height="512" alt="open in colab"></a> 
 </div>
 
 <div align="center">
